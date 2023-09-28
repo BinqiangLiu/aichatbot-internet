@@ -150,4 +150,5 @@ def agent():
     agent_executor = AgentExecutor.from_agent_and_tools(agent=agent,
                                                     tools=tools,
                                                     verbose=True)
+    print(agent_executor)
     return agent_executor
