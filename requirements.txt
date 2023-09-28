@@ -1,6 +1,6 @@
 langchain
 python-dotenv
 google-api-python-client
-openai
+#openai
 streamlit
 huggingface_hub
