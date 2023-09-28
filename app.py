@@ -12,10 +12,18 @@ from langchain.schema import AgentAction, AgentFinish
 import re
 import langchain
 import os
-import chainlit as cl
 import streamlit as st
+from dotenv import load_dotenv
+load_dotenv()
+from langchain.chains.question_answering import load_qa_chain
+from langchain import PromptTemplate, LLMChain
+from langchain import HuggingFaceHub
+import requests
+from pathlib import Path
+from time import sleep
+from langchain.agents import AgentType
 
-os.environ["OPENAI_API_KEY"] = "{Your_API_Key}"
+#os.environ["OPENAI_API_KEY"] = "{Your_API_Key}"
 
 '''
 template = """
@@ -58,6 +66,14 @@ Begin! Remember to answer as a passionate and informative travel expert when giv
 Question: {input}
 {agent_scratchpad}"""
 
+
+OPENAI_API_KEY =os.getenv("OPENAI_API_KEY")
+GOOGLE_API_KEY =os.getenv("GOOGLE_API_KEY")
+GOOGLE_CSE_ID =os.getenv("GOOGLE_CSE_ID")
+repo_id=os.getenv('repo_id')
+
+gsearch = GoogleSearchAPIWrapper()
+
 class CustomPromptTemplate(StringPromptTemplate):
     # The template to use
     template: str
@@ -79,8 +95,6 @@ class CustomPromptTemplate(StringPromptTemplate):
         # Create a list of tool names for the tools provided
         kwargs["tool_names"] = ", ".join([tool.name for tool in self.tools])
         return self.template.format(**kwargs)
-
-
 
 class CustomOutputParser(AgentOutputParser):
     
@@ -105,42 +119,15 @@ class CustomOutputParser(AgentOutputParser):
 
 
 def search_online(input_text):
-    search = DuckDuckGoSearchRun().run(f"site:tripadvisor.com things to do{input_text}")
-    return search
-def search_hotel(input_text):
-    search = DuckDuckGoSearchRun().run(f"site:booking.com {input_text}")
-    return search
-def search_flight(input_text):
-    search = DuckDuckGoSearchRun().run(f"site:skyscanner.com {input_text}")
-    return search
-def search_general(input_text):
-    search = DuckDuckGoSearchRun().run(f"{input_text}")
+    search=gsearch.run(input_text),
     return search
 
-@cl.langchain_factory
 def agent():
-
     tools = [
-
         Tool(
             name = "Search general",
             func=search_general,
             description="useful for when you need to answer general travel questions"
-        ),
-        Tool(
-            name = "Search tripadvisor",
-            func=search_online,
-            description="useful for when you need to answer trip plan questions"
-        ),
-        Tool(
-            name = "Search booking",
-            func=search_hotel,
-            description="useful for when you need to answer hotel questions"
-        ),
-        Tool(
-            name = "Search flight",
-            func=search_flight,
-            description="useful for when you need to answer flight questions"
         )
         
     ]
@@ -153,7 +140,8 @@ def agent():
     )
 
     output_parser = CustomOutputParser()
-    llm = ChatOpenAI(temperature=0)
+    #llm = ChatOpenAI(temperature=0)
+    llm=HuggingFaceHub(repo_id=repo_id)
     llm_chain = LLMChain(llm=llm, prompt=prompt)
     tool_names = [tool.name for tool in tools]
 
