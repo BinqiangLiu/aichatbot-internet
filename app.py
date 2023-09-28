@@ -2,11 +2,10 @@
 
 from langchain.agents import Tool, AgentExecutor, LLMSingleActionAgent, AgentOutputParser
 from langchain.prompts import StringPromptTemplate
-
 from langchain import LLMChain
 from langchain.chat_models import ChatOpenAI
 from langchain.tools import DuckDuckGoSearchRun 
-
+from langchain.utilities import GoogleSearchAPIWrapper
 from typing import List, Union
 from langchain.schema import AgentAction, AgentFinish
 import re
@@ -67,7 +66,7 @@ Question: {input}
 {agent_scratchpad}"""
 
 
-OPENAI_API_KEY =os.getenv("OPENAI_API_KEY")
+#OPENAI_API_KEY =os.getenv("OPENAI_API_KEY")
 GOOGLE_API_KEY =os.getenv("GOOGLE_API_KEY")
 GOOGLE_CSE_ID =os.getenv("GOOGLE_CSE_ID")
 repo_id=os.getenv('repo_id')
@@ -118,7 +117,7 @@ class CustomOutputParser(AgentOutputParser):
         return AgentAction(tool=action, tool_input=action_input.strip(" ").strip('"'), log=llm_output)
 
 
-def search_online(input_text):
+def search_general(input_text):
     search=gsearch.run(input_text),
     return search
 
