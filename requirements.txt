@@ -1,0 +1,6 @@
+langchain
+python-dotenv
+google-api-python-client
+openai
+streamlit
+huggingface_hub
